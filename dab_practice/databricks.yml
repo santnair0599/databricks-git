@@ -1,0 +1,47 @@
+
+bundle:
+  name: dab_practice
+  uuid: f8870afe-f197-4227-bbf5-6a0e3aaf0a69
+
+include:
+  - resources/*.yml
+
+
+# Variable declarations. These variables are assigned in the dev/prod targets below.
+variables:
+  catalog:
+    description: The catalog to use
+  schema:
+    description: The schema to use
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: dbc-d3c7f717-df2a.cloud.databricks.com
+      
+    variables:                    # <-- add this block
+      catalog: workspace
+      schema: dev
+    permissions:
+      - group_name: admins
+        level: CAN_MANAGE
+    presets:
+      name_prefix: ${workspace.current_user.short_name}
+      source_linked_deployment: false
+   
+  prod:
+    mode: production
+    workspace:
+      host: dbc-d3c7f717-df2a.cloud.databricks.com
+      # We explicitly deploy to /Workspace/Users/engineersantoshnair@outlook.com to make sure we only have a single copy.
+      root_path: /Workspace/PROD/.bundle/${bundle.name}/${bundle.target}
+    variables:
+      catalog: workspace
+      schema: prod
+    permissions:
+      - user_name: engineersantoshnair@outlook.com
+        level: CAN_MANAGE
+      - group_name: admins
+        level: CAN_RUN
